@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Play, Pause, SkipBack, SkipForward, Loader2, Film } from 'lucide-react';
 import Waveform, { WaveformHandle } from '../components/Waveform';
-import { projectsApi, lyricsApi } from '../lib/api';
+import { projectsApi, lyricsApi, mediaApi } from '../lib/api';
 import toast from 'react-hot-toast';
 import { templates, templateCategories, suggestTemplates } from '../data/templates';
 import ExportModal from '../components/ExportModal';
@@ -14,6 +14,7 @@ interface Project {
   title: string;
   artist: string;
   audio_url: string;
+  album_art_url: string | null;
   duration_seconds: number;
   config: {
     template: string;
@@ -51,6 +52,29 @@ export default function ProjectEditor() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [showStoryboard, setShowStoryboard] = useState(false);
   const [previewMode, setPreviewMode] = useState<'static' | 'animated'>('static');
+  const [albumArtUrl, setAlbumArtUrl] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const handleAlbumArtUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !id) return;
+
+    try {
+      setUploadingImage(true);
+      const response: any = await mediaApi.uploadImage(file);
+      const imageUrl = response.data.url;
+
+      // Update project with album art URL
+      await projectsApi.update(id, { albumArtUrl: imageUrl });
+      setAlbumArtUrl(imageUrl);
+      toast.success('Album art uploaded!');
+    } catch (error) {
+      console.error('Album art upload failed:', error);
+      toast.error('Failed to upload album art');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   useEffect(() => {
     loadProject();
@@ -95,6 +119,7 @@ export default function ProjectEditor() {
       setLoading(true);
       const response: any = await projectsApi.getById(id);
       setProject(response.data);
+      setAlbumArtUrl(response.data.album_art_url);
 
       // Load lyrics for this project
       await loadLyrics();
@@ -383,6 +408,36 @@ export default function ProjectEditor() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {/* Album Art Upload */}
+            <div className="relative">
+              <input
+                type="file"
+                id="album-art-upload"
+                accept="image/*"
+                onChange={handleAlbumArtUpload}
+                className="hidden"
+              />
+              <label
+                htmlFor="album-art-upload"
+                className={`btn flex items-center gap-2 cursor-pointer ${uploadingImage ? 'opacity-50' : ''}`}
+              >
+                {uploadingImage ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : albumArtUrl ? (
+                  <>
+                    <img src={albumArtUrl} className="w-6 h-6 rounded object-cover" alt="Album art" />
+                    Change Cover
+                  </>
+                ) : (
+                  <>
+                    🎨 Add Cover Art
+                  </>
+                )}
+              </label>
+            </div>
             <span className="text-sm text-gray-400">
               {Math.floor(project.duration_seconds / 60)}:{(project.duration_seconds % 60).toString().padStart(2, '0')}
             </span>

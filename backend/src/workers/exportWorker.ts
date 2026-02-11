@@ -21,6 +21,7 @@ interface RenderJobData {
     title: string;
     artist: string;
     audio_url: string;
+    album_art_url: string | null;
     duration_seconds: number;
     config: any;
   };
@@ -147,6 +148,7 @@ async function renderVideo(job: Job<RenderJobData>): Promise<void> {
       audioUrl: audioUrl,
       template: config.template || {},
       config: config,
+      albumArtUrl: project.album_art_url || undefined,
     };
 
     const composition = await selectComposition({

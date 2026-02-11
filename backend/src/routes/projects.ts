@@ -148,6 +148,10 @@ router.patch(
       updates.push(`status = $${paramCount++}`);
       values.push(data.status);
     }
+    if (data.albumArtUrl !== undefined) {
+      updates.push(`album_art_url = $${paramCount++}`);
+      values.push(data.albumArtUrl);
+    }
 
     if (updates.length === 0) {
       throw new AppError('No fields to update', 400);

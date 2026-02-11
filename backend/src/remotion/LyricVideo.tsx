@@ -13,6 +13,7 @@ interface LyricVideoProps {
   audioUrl: string;
   template: any;
   config: any; // Full VideoConfig with background, text, effects, etc.
+  albumArtUrl?: string; // Album cover art URL
 }
 
 export const LyricVideo: React.FC<LyricVideoProps> = ({
@@ -20,6 +21,7 @@ export const LyricVideo: React.FC<LyricVideoProps> = ({
   audioUrl,
   template,
   config,
+  albumArtUrl,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -152,6 +154,27 @@ export const LyricVideo: React.FC<LyricVideoProps> = ({
           transform: `translate(${floatX}px, ${floatY}px) rotate(${baseRotation + floatRotate}deg)`,
         };
 
+        // Handle different shape types
+        if (shape.type === 'emoji' || shape.type === 'star') {
+          // Render emoji or star as text
+          const displayChar = shape.type === 'star' ? '★' : shape.emoji || '⭐';
+          return (
+            <div
+              key={index}
+              style={{
+                ...shapeStyle,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: shape.size || '80px',
+                backgroundColor: 'transparent',
+              }}
+            >
+              {displayChar}
+            </div>
+          );
+        }
+
         if (shape.type === 'triangle') {
           shapeStyle.width = '0';
           shapeStyle.height = '0';
@@ -191,6 +214,32 @@ export const LyricVideo: React.FC<LyricVideoProps> = ({
           {displayText}
         </div>
       </AbsoluteFill>
+
+      {/* Album Art - Bottom Right Corner */}
+      {albumArtUrl && (
+        <AbsoluteFill
+          style={{
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'flex-end',
+            padding: '40px',
+            pointerEvents: 'none',
+          }}
+        >
+          <img
+            src={albumArtUrl}
+            alt="Album Art"
+            style={{
+              width: '200px',
+              height: '200px',
+              borderRadius: '12px',
+              objectFit: 'cover',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3)',
+              border: '3px solid rgba(255, 255, 255, 0.2)',
+            }}
+          />
+        </AbsoluteFill>
+      )}
     </AbsoluteFill>
   );
 };

@@ -118,6 +118,10 @@ lyric-video-generator/
 - **Fabric.js** - Canvas manipulation
 - **Framer Motion** - Animations
 
+## 📜 Third-Party Licenses
+
+This project uses Remotion. Remotion is licensed separately and has its own terms, including free usage for individuals/small teams and a company license requirement above the threshold described in their terms. Please review Remotion’s license/terms before distributing or commercializing this project.
+
 ### Backend
 - **Node.js + Express** - API server
 - **TypeScript** - Type safety

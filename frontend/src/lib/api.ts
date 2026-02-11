@@ -110,4 +110,13 @@ export const youtubeApi = {
   disconnect: () => api.delete('/youtube/disconnect'),
 };
 
+export const mediaApi = {
+  uploadImage: (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    // Don't set Content-Type manually - let the browser set it with the boundary
+    return api.post('/media/image/upload', formData);
+  },
+};
+
 export default api;
